@@ -31,6 +31,11 @@
                 <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
             </label>
         </div>
+        <div>
+            <x-input-label for="text" :value="__('Email:admin@kopi.com Pass: Password')" />
+            <x-text-input id="text" class="block mt-1 w-full" type="text" name="text" :value="old('text')" required autofocus autocomplete="username" @disabled(true)/>
+            <x-input-error :messages="$errors->get('text')" class="mt-2" />
+        </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))

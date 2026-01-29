@@ -6,8 +6,7 @@ return new class extends Migration
 {
     public function up()
     {
-        // 1. STORED FUNCTION: Generate Invoice Code Otomatis (String & Date Function)
-        // Format: INV-YYYYMMDD-XXX (e.g., INV-20251020-001)
+        // 1. STORED FUNCTION: Generate Invoice Code Otomatis
         DB::unprepared('
             CREATE FUNCTION generate_invoice_code() RETURNS VARCHAR(20)
             DETERMINISTIC
@@ -25,7 +24,7 @@ return new class extends Migration
             END
         ');
 
-        // 2. TRIGGER: Kurangi Stok Otomatis saat Detail Transaksi Masuk
+        // 2. Mengurangi Stok Otomatis saat Detail Transaksi Masuk
         DB::unprepared('
             CREATE TRIGGER reduce_stock_after_insert
             AFTER INSERT ON transaction_details
@@ -37,7 +36,7 @@ return new class extends Migration
             END
         ');
 
-        // 3. STORED PROCEDURE: Laporan Penualan Harian (Aggregate Function)
+        // 3.Laporan Penualan Harian 
         DB::unprepared('
             CREATE PROCEDURE get_daily_sales_report(IN target_date DATE)
             BEGIN

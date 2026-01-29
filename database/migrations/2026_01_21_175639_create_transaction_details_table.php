@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('transaction_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained();
             $table->integer('quantity');
-            $table->decimal('unit_price', 15, 2); // Harga saat transaksi terjadi (snapshot)
+            $table->decimal('unit_price', 15, 2); // harga per unit
             $table->decimal('subtotal', 15, 2);
 
             $table->timestamps();

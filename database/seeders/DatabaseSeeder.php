@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             'category_id' => $catMinuman->id,
             'name'        => 'Kopi Susu Gula Aren',
             'code'        => 'K001',
-            'stock'       => 100, // Perhatikan stok awal ini!
+            'stock'       => 100, 
             'price'       => 18000,
         ]);
 

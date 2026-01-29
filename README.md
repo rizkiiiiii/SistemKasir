@@ -58,3 +58,17 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
+## cara menjalankan project nya
+
+1. buka file .env lalu integrasikan dengan database
+2. pastikan database mysql bukan sqlite
+3. masukan nama database, username dan password database sesuai yang di pakai (jika ada)
+4. install terlebih dahulu composer agar ada folder vendor('composer install')
+5. jika sudah ada bisa langsung di update saja meminimalisir error vendor('composer update')
+6. migrate database dengan sytax ('php artisan migrate')
+7. install npm menggunakan sytax ('npm install')
+8. run npm ('npm run dev')
+9. buka terminal baru bisa bash atau yang lain nya lalu ketikan "php artisan serve"
+10. klik url yang di berikan (CTRL+Klik)
+11. akun sudah tersedia di seeder
+12. jika ingin menambahkan akun bisa di copy paste akun yang sudah ada dan edit sesuai yang dibutuhkan

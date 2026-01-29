@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(); // Siapa kasirnya
-            $table->string('invoice_code')->unique();    // INV-202511-001 (String function nanti main disini)
+            $table->foreignId('user_id')->constrained(); 
+            $table->string('invoice_code')->unique();    
             $table->dateTime('transaction_date');
             $table->decimal('subtotal', 15, 2)->default(0);
-            $table->decimal('tax', 15, 2)->default(0); // 10% atau 11%
+            $table->decimal('tax', 15, 2)->default(0); // data tax
             $table->decimal('service_charge', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
             $table->decimal('cash_paid', 15, 2);       // Uang yang dikasih

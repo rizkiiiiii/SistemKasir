@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('code')->unique(); // Kode unik produk (e.g. M001)
-            $table->integer('stock')->default(0); // Stok produk
-            $table->decimal('price', 15, 2); // Pake decimal buat duit, jangan integer/double!
+            $table->string('code')->unique(); 
+            $table->integer('stock')->default(0);
+            $table->decimal('price', 15, 2); 
             $table->string('image')->nullable();
             $table->timestamps();
         });

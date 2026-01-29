@@ -7,11 +7,9 @@ return new class extends Migration
 {
     public function up()
     {
-        // 1. Hapus Function Lama
+        // Memperbaiki logika generate_invoice_code biar ga duplikasi
         DB::unprepared('DROP FUNCTION IF EXISTS generate_invoice_code');
-
-        // 2. Buat Function Baru (Lebih Pinter)
-        // Bedanya: Ada tambahan "AND invoice_code LIKE 'INV-%'"
+        // Membuat ulang fungsi 
         DB::unprepared('
             CREATE FUNCTION generate_invoice_code() RETURNS VARCHAR(20)
             DETERMINISTIC
@@ -32,6 +30,6 @@ return new class extends Migration
 
     public function down()
     {
-        // Balikin ke versi lama kalau rollback (optional)
+        
     }
 };
