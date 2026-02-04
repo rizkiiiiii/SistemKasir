@@ -35,7 +35,7 @@ return new class extends Migration
         ");
 
         // 3. STORED FUNCTION: Cek Kenaikan Omset
-        // Bandingin omzet hari ini vs kemarin (output: '+10%' atau '-5%')
+        // Bandingin omset hari ini vs kemarin (output: '+10%' atau '-5%')
         DB::unprepared("
             CREATE FUNCTION sf_cek_kenaikan_omzet() RETURNS VARCHAR(10)
             DETERMINISTIC

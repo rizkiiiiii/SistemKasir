@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\Category; // <--- WAJIB ADA
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
@@ -12,77 +12,89 @@ class PosController extends Controller
 {
     public function index()
     {
-        // Ambil semua produk yang stoknya ada, urutkan dari yang terbaru
+        // 1. BALIKIN LOGIC LAMA (BIAR TIDAK ERROR VARIABLE $CATEGORIES)
         $products = Product::with('category')
             ->where('stock', '>', 0)
             ->latest()
             ->get();
 
-        // Ambil semua kategori buat filter nanti
+        // INI DIA YANG TADI HILANG
         $categories = Category::all();
 
         return view('pos.index', compact('products', 'categories'));
     }
+
     public function store(Request $request)
     {
-        // 1. Validasi Input
-        $request->validate([
-            'cart'      => 'required|array',
-            'cash_paid' => 'required|numeric',
-        ]);
-
-        // Hitung ulang di backend (Jangan percaya frontend 100%)
-        $subtotal = 0;
-        foreach ($request->cart as $item) {
-            $subtotal += $item['price'] * $item['qty'];
-        }
-        $tax          = $subtotal * 0.11; // 11%
-        $total_amount = ceil($subtotal + $tax);
-        $change       = $request->cash_paid - $total_amount;
-
-        if ($change < 0) {
-            return response()->json(['status' => 'error', 'message' => 'Uang kurang bos!'], 400);
-        }
-
-        // 2. Simpan Transaksi (Pake DB Transaction biar aman)
         try {
             DB::beginTransaction();
 
-            // Panggil Stored Function buat generate Invoice Code
-            // Note: Kita panggil raw select biar function SQL jalan
-            $invoiceCode = DB::select('SELECT generate_invoice_code() as code')[0]->code;
+            // --- GENERATE INVOICE ---
+            $dateCode = now()->format('Ymd');
 
-            // Simpan Header
-            $trx = Transaction::create([
-                'user_id'          => auth()->id(), // Siapa yg login
-                'invoice_code'     => $invoiceCode,
+            // Cari transaksi terakhir hari ini
+            $lastTransaction = Transaction::whereDate('transaction_date', today())
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($lastTransaction) {
+                // Format: INV-YYYYMMDD-XXX
+                $lastInvoiceCode = $lastTransaction->invoice_code;
+                $lastSequence    = (int) substr($lastInvoiceCode, -3);
+                $newSequence     = $lastSequence + 1;
+            } else {
+                $newSequence = 1;
+            }
+            $invoice_code = 'INV-' . $dateCode . '-' . str_pad($newSequence, 3, '0', STR_PAD_LEFT);
+            
+            // Simpan Header Transaksi
+            $transaction = Transaction::create([
+                'user_id'          => auth()->id(),
+                'invoice_code'     => $invoice_code,
                 'transaction_date' => now(),
-                'subtotal'         => $subtotal,
-                'tax'              => $tax,
-                'total_amount'     => $total_amount,
+                'subtotal'         => $request->subtotal,
+                'tax'              => $request->tax,
+                'total_amount'     => $request->total_amount,
                 'cash_paid'        => $request->cash_paid,
-                'change_returned'  => $change,
-                'payment_method'   => $request->payment_method,
+                'change_returned'  => $request->cash_paid - $request->total_amount, // Hitung kembalian di server
+                'payment_method'   => 'cash',
                 'status'           => 'completed',
             ]);
 
-            // Simpan Detail
+            // Simpan Detail & Kurangi Stok
             foreach ($request->cart as $item) {
                 TransactionDetail::create([
-                    'transaction_id' => $trx->id,
+                    'transaction_id' => $transaction->id,
                     'product_id'     => $item['id'],
                     'quantity'       => $item['qty'],
-                    'unit_price'     => $item['price'],
+                    'unit_price'     => $item['price'], 
                     'subtotal'       => $item['price'] * $item['qty'],
                 ]);
-                // TRIGGER OTOMATIS JALAN DI SINI (Stok berkurang sendiri)
+
+                // Update Stok
+                $product = Product::find($item['id']);
+                if ($product) {
+                    $product->decrement('stock', $item['qty']);
+                }
             }
 
             DB::commit();
-            return response()->json(['status' => 'success', 'change' => $change]);
+
+            // KIRIM DATA KE FRONTEND 
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Transaksi Berhasil!',
+                'data'    => [
+                    'invoice_code' => $transaction->invoice_code,
+                    'date'         => $transaction->transaction_date->format('d/m/Y H:i'),
+                    'total'        => $transaction->total_amount,
+                    'cash'         => $transaction->cash_paid,
+                    'change'       => $transaction->change_returned,
+                ],
+            ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollback();
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }

@@ -183,7 +183,7 @@
                     return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 },
                 get tax() {
-                    return this.subtotal * 0.11; 
+                    return Math.floor(this.subtotal * 0.11); 
                 },
                 get total() {
                     return Math.ceil(this.subtotal + this.tax);
@@ -222,16 +222,21 @@
                     return new Intl.NumberFormat('id-ID').format(number);
                 },
 
-                // LOGIC BARU: PRINT STRUK
-                printReceipt(data) {
-                    // 1. Isi data ke elemen struk
-                    document.getElementById('print-invoice').innerText = '...'; // Nanti ambil dari response kalau ada
-                    document.getElementById('print-date').innerText = new Date().toLocaleDateString('id-ID');
-                    document.getElementById('print-total').innerText = 'Rp ' + this.formatRupiah(this.total);
-                    document.getElementById('print-cash').innerText = 'Rp ' + this.formatRupiah(this.cashReceived);
-                    document.getElementById('print-change').innerText = 'Rp ' + this.formatRupiah(data.change);
+                // --- BAGIAN INI YANG SAYA PERBAIKI BIAR INVOICE MUNCUL ---
+                printReceipt(responseData) {
+                    // responseData ini isinya JSON dari Controller tadi
+                    
+                    // 1. Masukin Data Header
+                    // Ambil invoice_code dari response.data.invoice_code
+                    document.getElementById('print-invoice').innerText = responseData.data.invoice_code; 
+                    document.getElementById('print-date').innerText = responseData.data.date;
+                    
+                    // 2. Masukin Data Duit
+                    document.getElementById('print-total').innerText = 'Rp ' + this.formatRupiah(responseData.data.total);
+                    document.getElementById('print-cash').innerText = 'Rp ' + this.formatRupiah(responseData.data.cash);
+                    document.getElementById('print-change').innerText = 'Rp ' + this.formatRupiah(responseData.data.change);
 
-                    // 2. Render item belanjaan
+                    // 3. Render Item Belanjaan (Looping Cart yang ada di layar)
                     let itemsHtml = '';
                     this.cart.forEach(item => {
                         itemsHtml += `
@@ -243,11 +248,12 @@
                     });
                     document.getElementById('print-items').innerHTML = itemsHtml;
 
-                    // 3. Trigger Print Browser
+                    // 4. Print & Reset
                     setTimeout(() => {
                         window.print();
-                        // 4. Refresh halaman setelah print dialog ditutup
-                        window.location.reload(); 
+                        
+                        // Opsional: Reset cart setelah print dialog ditutup/selesai
+                        // window.location.reload(); 
                     }, 500);
                 },
 
@@ -256,24 +262,34 @@
                     
                     this.isLoading = true;
 
+                    // Kirim data lengkap ke backend
+                    let payload = {
+                        cart: this.cart,
+                        subtotal: this.subtotal,
+                        tax: this.tax,
+                        total_amount: this.total,
+                        cash_paid: this.cashReceived
+                    };
+
                     fetch('{{ route("pos.store") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({
-                            cart: this.cart,
-                            cash_paid: this.cashReceived,
-                            payment_method: 'cash'
-                        })
+                        body: JSON.stringify(payload)
                     })
                     .then(response => response.json())
                     .then(data => {
                         this.isLoading = false;
+                        
                         if(data.status === 'success') {
-                            // GANTI ALERT JADI PRINT
+                            // Panggil fungsi print dengan data dari backend
                             this.printReceipt(data);
+                            
+                            // Kosongkan cart setelah sukses (biar gak double input kalau user klik lagi)
+                            this.cart = [];
+                            this.cashReceived = '';
                         } else {
                             alert('Gagal: ' + data.message);
                         }

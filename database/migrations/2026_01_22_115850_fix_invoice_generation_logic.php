@@ -20,7 +20,7 @@ return new class extends Migration
                 SELECT IFNULL(MAX(CAST(RIGHT(invoice_code, 3) AS UNSIGNED)), 0) INTO last_no
                 FROM transactions
                 WHERE DATE(transaction_date) = CURDATE()
-                AND invoice_code LIKE "INV-%"; -- <--- INI TAMBAHANNYA
+                AND invoice_code LIKE "INV-%"; 
 
                 SET new_code = CONCAT("INV-", DATE_FORMAT(NOW(), "%Y%m%d"), "-", LPAD(last_no + 1, 3, "0"));
                 RETURN new_code;
