@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Traits\AuditLogger;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, AuditLogger;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id', // Updated from 'role' to 'role_id'
+        'role', // Keeping for backward compatibility if needed, but likely redundant
     ];
 
     /**
@@ -42,7 +44,24 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Check if user has specific role
+     * @param string|array $roles
+     */
+    public function hasRole($roles)
+    {
+        if (is_array($roles)) {
+            return in_array($this->role->name, $roles);
+        }
+        return $this->role->name === $roles;
     }
 }

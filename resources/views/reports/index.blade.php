@@ -1,12 +1,21 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Laporan Harian') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            <!-- Title & Actions (Moved from Header Slot) -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h2 class="font-bold text-2xl text-gray-800 dark:text-white leading-tight">
+                    {{ __('Laporan Harian') }}
+                </h2>
+                <div class="flex gap-2">
+                    <a href="{{ route('reports.export.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-green-200 transition flex items-center gap-2 transform hover:-translate-y-0.5">
+                        <span class="text-xl">📊</span> Export Excel
+                    </a>
+                    <a href="{{ route('reports.export.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-red-200 transition flex items-center gap-2 transform hover:-translate-y-0.5">
+                        <span class="text-xl">📄</span> Export PDF
+                    </a>
+                </div>
+            </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">

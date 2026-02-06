@@ -8,4 +8,9 @@ class Category extends Model
 {
     use HasFactory;
     protected $guarded = ['id']; // Kita bolehin ngisi semua kolom kecuali ID
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

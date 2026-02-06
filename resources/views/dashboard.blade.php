@@ -8,44 +8,33 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
-            {{-- BARIS 1: KARTU STATISTIK (Aggregate Function & Stored Function) --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500">
-                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Pendapatan Hari Ini</div>
-                    <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                        Rp {{ number_format($total_revenue, 0, ',', '.') }}
-                    </div>
-                    <div class="mt-2 text-xs">
-                        <span class="{{ str_contains($sales_growth, '+') ? 'text-green-500' : 'text-red-500' }} font-bold">
-                            {{ $sales_growth }}
-                        </span> 
-                        dibanding Kemarin
-                        <span class="block text-[10px] text-gray-400 mt-1 italic">(Sumber Stored Function: `get_sales_growth`)</span>
-                    </div>
-                </div>
 
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
-                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Transaksi</div>
-                    <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                        {{ $total_trx }}
-                    </div>
-                    <div class="mt-2 text-xs text-gray-400">
-                        Nota tercetak hari ini
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-purple-500">
-                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Menu Aktif</div>
-                    <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                        {{ \App\Models\Product::count() }}
-                    </div>
-                    <div class="mt-2 text-xs text-gray-400">
-                        Item tersedia di database
-                    </div>
-                </div>
-            </div>
 
             {{-- BARIS 2: WIDGET DETAIL (Stored Proc & View) --}}
+            <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+        Dashboard
+    </h2>
+
+    <!-- Cards -->
+    <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+        <x-stat-card title="Total Penjualan" value="Rp {{ number_format($total_revenue, 0, ',', '.') }}" icon="fas fa-coins" color="green" />
+        <x-stat-card title="Total Transaksi" value="{{ $total_trx }}" icon="fas fa-shopping-cart" color="blue" />
+        <x-stat-card title="Kenaikan Omzet" value="{{ $sales_growth }}%" icon="fas fa-chart-line" color="{{ $sales_growth > 0 ? 'green' : 'red' }}" />
+        <x-stat-card title="Produk Stok Rendah" value="{{ count($low_stock_items) }} Item" icon="fas fa-exclamation-triangle" color="red" />
+    </div>
+
+    <!-- New Table -->
+    <div class="w-full overflow-hidden rounded-lg shadow-xs">
+        <div class="w-full overflow-x-auto">
+            <h4 class="mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300">
+                Transaksi Terbaru
+            </h4>
+            <!-- Placeholder for chart or table -->
+            <div class="p-4 bg-white rounded-lg dark:bg-gray-800 text-gray-500 text-center">
+                Belum ada data transaksi hari ini.
+            </div>
+        </div>
+    </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
